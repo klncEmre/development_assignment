@@ -6,11 +6,11 @@
 //
 
 import Foundation
-//First I will get json data with this function
 
+var name: String?
 
-
-func get_json_data(urlString: String) {
+func calculateCostFromJson(urlString: String) {
+    //First I will get json data with this function
     if let url = URL(string: urlString){
         
         let session = URLSession(configuration: .default)
@@ -19,9 +19,8 @@ func get_json_data(urlString: String) {
         
         task.resume()
     }
-    
-    
 }
+
 //This function will be used to handle error and response in get_json_data function.
 func handle(data: Data?, response: URLResponse?, error: Error?){
     if(error != nil){
@@ -30,18 +29,18 @@ func handle(data: Data?, response: URLResponse?, error: Error?){
     }
     if let safeData = data {
         parseJsonData(itemDataToUse: safeData)
-        
-        
-        
     }
-    
 }
 
-func parseJsonData(itemDataToUse: Data){ //Function to parse json data to Struct that I have created (itemData)
+func parseJsonData(itemDataToUse: Data){ //function to decode the data and print the calculation result. Calculate the cost with decoded data using calculateCost function which has recursive algorithm.
     let decoder = JSONDecoder()
+    var cost: Int
     do {
         let decodedData = try decoder.decode(itemData.self, from: itemDataToUse)
-        calculateCost(itemDataGiven: decodedData)
+        name = decodedData.name
+        cost = calculateCost(itemDataGiven: decodedData) //Begin to recursive function here with decoded data.
+        let text = "Cost of item " + name! + " is " + String(cost) + " units"
+        print(text)
     }
     catch{
         print(error)
@@ -50,8 +49,26 @@ func parseJsonData(itemDataToUse: Data){ //Function to parse json data to Struct
 
 
 
+func calculateCost(itemDataGiven : itemData ) -> Int{ //This function calculate cost recursively.
+    
+    var localCost = 0
 
-get_json_data(urlString: "https://prod-storyly-media.s3.eu-west-1.amazonaws.com/test-scenarios/sample_1.json")
+    if let items = itemDataGiven.items{ //check that if it has items or not. If it has items, I will calculate each item's cost with for loop.
+        for item in items {
+            localCost += calculateCost(itemDataGiven: item)
+        }
+    }
+    else{
+        //if it has no item, it must has price property.
+        localCost = itemDataGiven.price!
+    }
+    
+    return localCost * itemDataGiven.count
+    
+}
 
 
-sleep(3)
+calculateCostFromJson(urlString: "https://prod-storyly-media.s3.eu-west-1.amazonaws.com/test-scenarios/sample_3.json")
+
+
+sleep(1)
