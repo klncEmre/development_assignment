@@ -21,7 +21,7 @@ func calculateCostFromJson(urlString: String) {
     }
 }
 
-//This function will be used to handle error and response in get_json_data function.
+//This function will be used to handle error and response in calculateCostFromJson  function.
 func handle(data: Data?, response: URLResponse?, error: Error?){
     if(error != nil){
         print(error!)
